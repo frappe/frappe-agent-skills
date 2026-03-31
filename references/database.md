@@ -50,8 +50,9 @@ doc = frappe.get_doc("Expense", "EXP-0001")
 doc.amount = 75
 doc.save()
 
-# Quick update (single field, no controller hooks)
-frappe.db.set_value("Expense", "EXP-0001", "status", "Approved")
+# Quick update (single field, skips controller hooks)
+# Use for derived/cached fields, counters, timestamps — NOT for fields with validation logic or status transitions
+frappe.db.set_value("Expense", "EXP-0001", "amount", 75)
 
 # Bulk update
 frappe.db.set_value("Expense", {"status": "Draft"}, "status", "Cancelled")
@@ -171,7 +172,6 @@ results = query.run(as_dict=True)
 
 ## Anti-patterns
 
-- **Don't call `frappe.db.commit()` in request handlers, background jobs, or controller methods.** Frappe auto-commits POST/PUT requests, background jobs, and patches on success, and auto-rollbacks on uncaught exceptions. Manual commits break transactional safety. Only use `frappe.db.commit()` when you must flush writes mid-transaction (e.g. before `frappe.enqueue` that reads just-written data).
 - **Don't use raw SQL when `frappe.qb` works.** Prefer the query builder for UPDATE/INSERT. Use `frappe.db.sql` only for queries `frappe.qb` cannot express (CTEs, etc.).
   ```python
   # BAD

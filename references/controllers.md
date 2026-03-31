@@ -123,7 +123,7 @@ doc.save()
   doc.status = "Approved"
   doc.save()
   ```
-- **Don't call `frappe.db.commit()` in controller methods or request handlers.** Frappe auto-commits POST/PUT requests, background jobs, and patches on success. Uncaught exceptions auto-rollback in all contexts. Manual commits break transactional safety. Only use when flushing writes before `frappe.enqueue` that reads just-written data.
+- **Don't call `frappe.db.commit()` in controller methods or request handlers.** See the Transactions section in [database](./database.md) reference.
 - **Put permission checks inside controller methods**, not in API wrapper helpers. This ensures enforcement regardless of call path (API, desk, background job).
   ```python
   # BAD — check in api.py wrapper
