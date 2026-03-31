@@ -181,6 +181,7 @@ results = query.run(as_dict=True)
   frappe.qb.update(Expense).set(Expense.amount, Expense.amount + 1).where(Expense.name == name).run()
   ```
 - **Don't make multiple queries when one will do.** Use OR filters via `frappe.qb.get_query` instead of chaining `frappe.db.get_value(...) or frappe.db.get_value(...)`.
+- **Use `frappe.db.delete` for bulk deletion when the DocType has no `on_trash`/`after_delete` hooks.** It runs a single DELETE query. Use `frappe.delete_doc` in a loop only when controller trash hooks need to fire.
 - **Batch-fetch related records instead of querying in a loop.**
   ```python
   # BAD — N+1

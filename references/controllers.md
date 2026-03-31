@@ -136,3 +136,4 @@ doc.save()
           if "Expense Manager" not in frappe.get_roles():
               frappe.throw("Not allowed", frappe.PermissionError)
   ```
+- **Be consistent with permission checks across all controller methods.** If some methods on a DocType check for a role explicitly, all mutating methods should do the same — don't rely on implicit DocType perms for some and explicit checks for others.
