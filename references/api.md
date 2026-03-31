@@ -149,3 +149,24 @@ POST /api/v2/document/<DocType>/bulk_update   # body: {"docs": [{"name": "...", 
 Large bulk operations (>20 items by default) are automatically enqueued as background jobs.
 
 Only create custom `@frappe.whitelist()` endpoints for logic that goes beyond CRUD.
+
+## Specify HTTP methods
+
+Always declare allowed HTTP methods explicitly. Frappe auto-commits only for POST/PUT — GET requests do not commit.
+
+```python
+@frappe.whitelist(methods=["GET"])
+def get_dashboard_data(): ...
+
+@frappe.whitelist(methods=["POST"])
+def submit_entry(name: str): ...
+
+@frappe.whitelist(methods=["GET", "POST"])
+def get_or_create_token(): ...
+```
+
+## Anti-patterns
+
+- **Don't wrap doc methods in standalone APIs.** If the controller has `@frappe.whitelist()` on a method, clients call it directly via `frm.call("approve")` or `POST /api/v2/document/Expense/EXP-001/method/approve`. Don't create a separate `api.py` function that just fetches the doc and calls the same method.
+- **Don't put doc-scoped logic in standalone APIs.** If the function fetches one doc, validates the caller, and acts on that doc — it belongs as a doc-level `@frappe.whitelist()` method, not in `api/`. Reserve standalone APIs for cross-document operations, aggregations, or endpoints with no document context.
+- **Don't leak sensitive fields in guest APIs.** With `allow_guest=True`, only return fields guests need. Never expose `user` (email), internal IDs, or permission-sensitive data.

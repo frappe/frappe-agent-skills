@@ -135,18 +135,22 @@ with frappe.db.unbuffered_cursor():
 
 ## Transactions
 
-Frappe auto-commits after each web request. Manual commit/rollback is rarely needed.
+Frappe manages transactions automatically. You almost never need `frappe.db.commit()` or `frappe.db.rollback()`.
+
+- **POST/PUT web requests**: auto-commit after successful completion. GET requests do NOT commit.
+- **Background/scheduled jobs**: auto-commit after successful completion.
+- **Patches**: auto-commit after successful `execute()`.
+- **Uncaught exceptions**: auto-rollback in all contexts (web requests, background jobs, patches).
+
+`frappe.db.commit()` is only needed in rare cases like flushing writes mid-script so a subsequent `frappe.enqueue` call can read them.
 
 ```python
-frappe.db.commit()    # almost never needed — only for long-running scripts or background jobs
-
 # Use savepoints for partial rollback within a transaction
 frappe.db.savepoint("before_risky_op")
 try:
-    # risky operation
     ...
 except Exception:
-    frappe.db.rollback(save_point="before_risky_op")  # rolls back only to savepoint, not entire transaction
+    frappe.db.rollback(save_point="before_risky_op")
 ```
 
 ## PyPika query builder (`frappe.qb`)
@@ -164,3 +168,27 @@ query = (
 )
 results = query.run(as_dict=True)
 ```
+
+## Anti-patterns
+
+- **Don't call `frappe.db.commit()` in request handlers, background jobs, or controller methods.** Frappe auto-commits POST/PUT requests, background jobs, and patches on success, and auto-rollbacks on uncaught exceptions. Manual commits break transactional safety. Only use `frappe.db.commit()` when you must flush writes mid-transaction (e.g. before `frappe.enqueue` that reads just-written data).
+- **Don't use raw SQL when `frappe.qb` works.** Prefer the query builder for UPDATE/INSERT. Use `frappe.db.sql` only for queries `frappe.qb` cannot express (CTEs, etc.).
+  ```python
+  # BAD
+  frappe.db.sql("UPDATE `tabExpense` SET `amount` = `amount` + 1 WHERE name = %s", (name,))
+  # GOOD
+  Expense = frappe.qb.DocType("Expense")
+  frappe.qb.update(Expense).set(Expense.amount, Expense.amount + 1).where(Expense.name == name).run()
+  ```
+- **Don't make multiple queries when one will do.** Use OR filters via `frappe.qb.get_query` instead of chaining `frappe.db.get_value(...) or frappe.db.get_value(...)`.
+- **Batch-fetch related records instead of querying in a loop.**
+  ```python
+  # BAD — N+1
+  for exp in expenses:
+      exp.category_label = frappe.db.get_value("Expense Category", exp.category, "label")
+  # GOOD
+  cat_ids = {e.category for e in expenses if e.category}
+  cat_map = {c.name: c.label for c in frappe.get_all("Expense Category", filters={"name": ["in", list(cat_ids)]}, fields=["name", "label"])}
+  for exp in expenses:
+      exp.category_label = cat_map.get(exp.category)
+  ```

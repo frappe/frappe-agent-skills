@@ -111,3 +111,28 @@ def on_submit(self):
 doc.flags.ignore_validate = True
 doc.save()
 ```
+
+## Anti-patterns
+
+- **Don't use `frappe.db.set_value` for fields with validation logic.** It bypasses `validate()`, `before_save()`, and all lifecycle hooks. Never use it for status fields or state transitions. Use it only for simple counters, timestamps, or cached values.
+  ```python
+  # BAD — skips controller validation
+  frappe.db.set_value("Expense", name, "status", "Approved")
+  # GOOD
+  doc = frappe.get_doc("Expense", name)
+  doc.status = "Approved"
+  doc.save()
+  ```
+- **Don't call `frappe.db.commit()` in controller methods or request handlers.** Frappe auto-commits POST/PUT requests, background jobs, and patches on success. Uncaught exceptions auto-rollback in all contexts. Manual commits break transactional safety. Only use when flushing writes before `frappe.enqueue` that reads just-written data.
+- **Put permission checks inside controller methods**, not in API wrapper helpers. This ensures enforcement regardless of call path (API, desk, background job).
+  ```python
+  # BAD — check in api.py wrapper
+  def _get_manager_doc(name):
+      if "Expense Manager" not in frappe.get_roles(): ...
+  # GOOD — check in the controller method itself
+  class Expense(Document):
+      @frappe.whitelist()
+      def approve(self):
+          if "Expense Manager" not in frappe.get_roles():
+              frappe.throw("Not allowed", frappe.PermissionError)
+  ```

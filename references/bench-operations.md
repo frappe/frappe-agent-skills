@@ -40,6 +40,9 @@ bench --site <site> console
 # Execute a Python expression
 bench --site <site> execute frappe.utils.get_url
 
+# Execute with args and kwargs
+bench --site <site> execute path.to.function arg1 arg2 --kwarg1 hello
+
 # Run tests
 bench --site <site> run-tests --app <app-name>
 bench --site <site> run-tests --doctype "DocType Name"
