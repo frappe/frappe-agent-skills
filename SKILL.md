@@ -38,6 +38,7 @@ Load ONLY the references needed for the current task:
 | Controllers      | Document lifecycle, server logic             | [controllers.md](./references/controllers.md)           |
 | Whitelisted APIs | REST endpoints, `@frappe.whitelist()`        | [api.md](./references/api.md)                           |
 | Database & ORM   | `frappe.db`, queries, raw SQL                | [database.md](./references/database.md)                 |
+| Logging          | `frappe.logger`, `frappe.log_error`, Error Log | [logging.md](./references/logging.md)                 |
 | Caching          | Redis, `frappe.cache`                        | [caching.md](./references/caching.md)                   |
 | Realtime         | WebSocket, `publish_realtime`                | [realtime.md](./references/realtime.md)                 |
 | Background jobs  | `frappe.enqueue`, scheduled jobs             | [background-jobs.md](./references/background-jobs.md)   |
