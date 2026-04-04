@@ -1,6 +1,6 @@
 ---
 name: frappe-dev
-description: Builds full-stack Frappe Framework applications end-to-end. Use this skill any time the user mentions: creating or modifying a DocType, writing a controller or lifecycle hook, adding a whitelisted API, setting up a new Frappe app or bench site, building a desk form or list view, creating portal pages, writing background jobs or scheduled tasks, managing permissions or roles, writing Frappe tests, or working with frappe.db / frappe.qb. Also applies when the user says things like "how do I hook into save", "add a field to a DocType", "create a REST endpoint in Frappe", "run bench migrate", or "install an app on a site" — even if they don't explicitly say "Frappe".
+description: 'Builds full-stack Frappe Framework applications end-to-end. Use this skill any time the user mentions: creating or modifying a DocType, writing a controller or lifecycle hook, adding a whitelisted API, setting up a new Frappe app or bench site, building a desk form or list view, creating portal pages, writing background jobs or scheduled tasks, managing permissions or roles, writing Frappe tests, or working with frappe.db / frappe.qb. Also applies when the user says things like "how do I hook into save", "add a field to a DocType", "create a REST endpoint in Frappe", "run bench migrate", or "install an app on a site" — even if they don''t explicitly say "Frappe".'
 ---
 
 # Frappe Full-Stack App Builder
@@ -38,6 +38,7 @@ Load ONLY the references needed for the current task:
 | Controllers      | Document lifecycle, server logic             | [controllers.md](./references/controllers.md)           |
 | Whitelisted APIs | REST endpoints, `@frappe.whitelist()`        | [api.md](./references/api.md)                           |
 | Database & ORM   | `frappe.db`, queries, raw SQL                | [database.md](./references/database.md)                 |
+| Logging          | `frappe.logger`, `frappe.log_error`, Error Log | [logging.md](./references/logging.md)                 |
 | Caching          | Redis, `frappe.cache`                        | [caching.md](./references/caching.md)                   |
 | Realtime         | WebSocket, `publish_realtime`                | [realtime.md](./references/realtime.md)                 |
 | Background jobs  | `frappe.enqueue`, scheduled jobs             | [background-jobs.md](./references/background-jobs.md)   |
