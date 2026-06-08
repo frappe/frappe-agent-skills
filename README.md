@@ -5,7 +5,7 @@ Agent skill for building full-stack [Frappe Framework](https://frappeframework.c
 ## Install
 
 ```bash
-npx skills add netchampfaris/frappe-agent-skills --skill frappe-dev
+npx skills add frappe/frappe-agent-skills --skill frappe-dev
 ```
 
 ## What it covers
