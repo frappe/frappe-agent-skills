@@ -1,28 +1,38 @@
-# frappe-agent-skills
+# Frappe Skills
 
-Agent skill for building full-stack [Frappe Framework](https://frappeframework.com/) applications.
+A collection of agent skills for building [Frappe Framework](https://frappeframework.com/) applications, plus general code-style and UI design skills.
+
+## Skills
+
+| Skill            | What it covers                                                                                                                                                                                 |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `frappe-app-dev` | Full-stack Frappe: DocTypes, controllers, APIs, database/ORM, hooks, permissions, jobs, realtime, caching, testing, app setup, frontend (Desk/Vue/portal), and the bench CLI + site management |
+| `code-style`     | General code style rules                                                                                                                                                                       |
+| `ui-design`      | General UI/UX design principles                                                                                                                                                                |
 
 ## Install
 
+Install all skills from the repo:
+
 ```bash
-npx skills add netchampfaris/frappe-agent-skills --skill frappe-dev
+npx skills add frappe/skills
 ```
 
-## What it covers
+Install a single skill:
 
-- DocTypes, fields, naming, child tables
-- Controller lifecycle hooks and validation patterns
-- Whitelisted APIs (`@frappe.whitelist()`) and built-in v2 REST APIs
-- Database ORM — `frappe.db`, `frappe.qb.get_query`, filters, transactions
-- Hooks (`hooks.py`) — doc events, scheduled jobs, fixtures, install hooks
-- Permissions — role-based, row-level (`permission_query_conditions`), `has_permission`
-- Background jobs (`frappe.enqueue`, `frappe.enqueue_doc`)
-- Realtime (Socket.IO, `publish_realtime`)
-- Caching (`frappe.cache`)
-- Frontend — Desk client scripts, Vue 3 + frappe-ui SPA, portal pages
-- Testing — `IntegrationTestCase`, `UnitTestCase`, test site setup
-- Bench CLI — app/site lifecycle, migrations, fixtures
+```bash
+npx skills add frappe/skills --skill frappe-app-dev
+```
+
+Install several at once:
+
+```bash
+npx skills add frappe/skills \
+  --skill frappe-app-dev --skill code-style --skill ui-design
+```
+
+Skills are matched by the `name` field in each `SKILL.md` frontmatter, and live under `skills/<name>/`.
 
 ## Usage
 
-Once installed, the skill activates automatically when you ask your agent about Frappe development tasks — creating DocTypes, writing controllers, setting up a bench site, adding APIs, and so on.
+Once installed, each skill activates automatically when you ask your agent about a matching task — creating DocTypes, building a Vue SPA, or running `bench migrate` (`frappe-app-dev`); enforcing code style (`code-style`); UI/UX judgment (`ui-design`); and so on.
