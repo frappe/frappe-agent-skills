@@ -1,5 +1,5 @@
 ---
-name: frappe-dev
+name: frappe-app-dev
 description: >-
   Builds full-stack Frappe Framework applications end-to-end. Use this skill any
   time the user mentions: creating or modifying a DocType, writing a controller
