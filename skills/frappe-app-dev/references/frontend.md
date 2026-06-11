@@ -1,11 +1,11 @@
-# Frontend Router
+# Frontend & UI
 
-Load only the frontend type relevant to the task.
+Frappe apps can have three types of frontends. Detect which one applies by looking at the app structure, then load ONLY the relevant file:
 
-| Type | Detect by | Reference |
-| --- | --- | --- |
-| Desk | DocType form/list customization, client scripts | [frontend-desk.md](./frontend-desk.md) |
-| Vue SPA | `frontend/` with Vite/frappe-ui | [frontend-vue.md](./frontend-vue.md) |
-| Portal | `www/` templates or website routes | [frontend-portal.md](./frontend-portal.md) |
+| Type | How to detect | File |
+|------|--------------|------|
+| **Desk** (admin UI) | All apps have this by default | [frontend-desk.md](./frontend-desk.md) |
+| **Vue 3 + frappe-ui + Vite** | `frontend/` directory with `vite.config.ts` | [frontend-vue.md](./frontend-vue.md) |
+| **Portal pages** | `www/` directory with `.html` templates | [frontend-portal.md](./frontend-portal.md) |
 
-Apps can use multiple frontend types at once. Match the existing pattern before adding another layer.
+An app can use multiple types simultaneously (e.g. Desk for admin + Vue SPA for users).

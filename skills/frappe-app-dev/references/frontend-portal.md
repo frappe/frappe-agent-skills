@@ -1,16 +1,42 @@
-# Portal Pages
+# Portal Pages (Public Website)
 
-Use this for server-rendered website/portal pages with Jinja templates.
+Server-rendered Jinja templates for public-facing pages.
 
-## Files
+## Jinja templates
 
-- Template: `apps/<app>/<app>/www/<page>.html`.
-- Context: `apps/<app>/<app>/www/<page>.py`.
-- Routes and website permissions usually live in `hooks.py`.
+File: `apps/<app>/<app>/www/<page_name>.html`
 
-## Rules
+```html
+{% extends "templates/web.html" %}
+{% block page_content %}
+<h1>Expenses</h1>
+{% for expense in expenses %}
+<div>{{ expense.title }} — {{ expense.amount }}</div>
+{% endfor %}
+{% endblock %}
+```
 
-- Escape by default; avoid marking user content safe unless sanitized.
-- Use permission-aware queries for user-facing data.
-- Keep page context thin; move reusable logic into app modules.
-- Check `has_website_permission` or existing portal permission patterns before exposing document data.
+Context via Python:
+File: `apps/<app>/<app>/www/<page_name>.py`
+
+```python
+import frappe
+
+def get_context(context):
+    context.expenses = frappe.db.get_all("Expense",
+        filters={"owner": frappe.session.user},
+        fields=["title", "amount"])
+```
+
+## Portal settings
+
+In `hooks.py`:
+```python
+website_route_rules = [
+    {"from_route": "/expenses", "to_route": "Expense"},
+]
+
+has_website_permission = {
+    "Expense": "myapp.permissions.has_website_permission"
+}
+```

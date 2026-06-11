@@ -1,23 +1,123 @@
 # Permissions
 
-Permissions must be enforced consistently across Desk, API, background jobs, and direct document methods.
+## DocType-level permissions
 
-## Rules
+Define in the DocType JSON under `permissions`:
 
-- Define baseline DocType permissions in DocType JSON.
-- Create custom roles through fixtures, install/setup code, or exported site records; do not invent arbitrary source folders for standard DocTypes.
-- Use `ignore_permissions` only in trusted server-side flows, never as a shortcut in user-facing APIs.
-- Pair list filtering with document-level checks when access is row-specific.
+```json
+{
+    "permissions": [
+        {
+            "role": "System Manager",
+            "read": 1, "write": 1, "create": 1, "delete": 1, "submit": 0, "cancel": 0
+        },
+        {
+            "role": "Expense User",
+            "read": 1, "write": 1, "create": 1, "delete": 0
+        }
+    ]
+}
+```
 
-## Where Logic Goes
+Permission levels: `read`, `write`, `create`, `delete`, `submit`, `cancel`, `amend`, `print`, `email`, `share`, `export`, `import`, `report`.
 
-- DocType permission table: coarse role permissions.
-- Controller `has_permission`: per-document checks.
-- `permission_query_conditions` in `hooks.py`: list filtering and `get_list` visibility.
-- Business action methods: explicit role/state checks for mutating operations.
+## Custom roles
 
-## Pitfalls
+Create a Role DocType JSON:
+```json
+{
+    "name": "Expense User",
+    "doctype": "Role",
+    "desk_access": 1,
+    "is_custom": 0
+}
+```
 
-- `permission_query_conditions` protects lists, not direct document access by itself.
-- `get_all` ignores permissions; use `get_list` for permission-aware user-facing queries.
-- `frappe.set_user` and `ignore_permissions` can leak privileges if not restored or scoped tightly.
+Place at: `apps/<app>/<app>/<module>/role/expense_user/expense_user.json`
+
+Or use fixtures in `hooks.py`:
+```python
+fixtures = [
+    {"dt": "Role", "filters": [["name", "in", ["Expense User", "Expense Manager"]]]}
+]
+```
+
+## Programmatic permission checks
+
+```python
+# Check if current user has permission
+frappe.has_permission("Expense", "read")
+frappe.has_permission("Expense", "write", doc="EXP-0001")
+
+# Throw if no permission
+frappe.has_permission("Expense", "write", throw=True)
+
+# Check for specific user
+frappe.has_permission("Expense", "read", user="john@example.com")
+```
+
+## Bypassing permissions
+
+```python
+# Insert without permission checks
+doc.insert(ignore_permissions=True)
+
+# flags approach
+doc.flags.ignore_permissions = True
+doc.save()
+
+# Run as Administrator
+frappe.set_user("Administrator")
+# ... do work ...
+frappe.set_user(original_user)
+```
+
+Use `ignore_permissions` only in server-side background logic, never in user-facing APIs.
+
+## User-based filtering (owner permissions)
+
+Add `"if_owner": 1` to a permission rule to restrict users to their own documents:
+```json
+{
+    "role": "Expense User",
+    "read": 1, "write": 1,
+    "if_owner": 1
+}
+```
+
+## `has_permission` controller hook
+
+```python
+class Expense(Document):
+    def has_permission(self, permtype, user=None):
+        if permtype == "read" and self.department == get_user_department(user):
+            return True
+        return False
+```
+
+## Row-level filtering on list views (`get_query_conditions`)
+
+To restrict which records appear in list views and `get_list` calls, define `permission_query_conditions` in `hooks.py`:
+
+```python
+# hooks.py
+permission_query_conditions = {
+    "Expense": "myapp.permissions.expense_query_conditions",
+}
+```
+
+```python
+# myapp/permissions.py
+import frappe
+
+def expense_query_conditions(user=None):
+    if not user:
+        user = frappe.session.user
+    if "Expense Manager" in frappe.get_roles(user):
+        return ""  # no restriction
+    return f"`tabExpense`.`owner` = {frappe.db.escape(user)}"
+```
+
+Return a SQL WHERE clause fragment (string), or `""` for no restriction. Return `False` to deny all access.
+
+Pair with `has_permission` for complete coverage — `permission_query_conditions` filters lists, `has_permission` guards individual documents.
